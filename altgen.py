@@ -54,20 +54,21 @@ async def on_ready():
 
 @bot.hybrid_command(name="generate", description="Generate a Roblox account")
 @app_commands.describe(type="Select the type of account to generate")
+@commands.cooldown(1, 500, commands.BucketType.user)
 async def generate(ctx: commands.Context, type: str):
     if type == "free":
         items_list = free_items_list
     elif type == "premium":
-        if any(role.name == "Premium" for role in ctx.author.roles): 
+        if any(role.name == "customers" for role in ctx.author.roles): 
             items_list = premium_items_list
         else:
-            await ctx.send("You need the premium role to access this option.", ephemeral=True)
+            await ctx.send("You need the customer role to access this option.", ephemeral=True)
             return
     elif type == "letter":
-        if any(role.name == "Premium" for role in ctx.author.roles):
+        if any(role.name == "customers" for role in ctx.author.roles):
             items_list = letter_items_list
         else:
-            await ctx.send("You need the premium role to access this option.", ephemeral=True)
+            await ctx.send("You need the customer role to access this option.", ephemeral=True)
             return
     else:
         await ctx.send("Invalid option. Please use `free`, `premium`, or `letter`.", ephemeral=True)
@@ -100,6 +101,7 @@ async def generate_error(ctx: commands.Context, error):
             ephemeral=True
         )
 
+
 @bot.hybrid_command(name="stock", description="Show the number of items in stock")
 async def stock(ctx: commands.Context):
     free_items_in_stock = len([item for item in free_items_list if item not in generated_items])
@@ -120,7 +122,7 @@ async def stock(ctx: commands.Context):
 @bot.hybrid_command(name="addstock", description="Add items to the stock")
 @app_commands.describe(item_type="Type of item to add (free, premium, or letter)", items="Comma-separated list of items to add")
 async def addstock(ctx: commands.Context, item_type: str, *, items: str):
-    if any(role.name == "Owner" for role in ctx.author.roles):  
+    if any(role.name == "Founder" for role in ctx.author.roles):  
         item_list = items.split(",")
         item_list = [item.strip() for item in item_list] 
 
@@ -159,7 +161,7 @@ async def history(ctx: commands.Context):
 
 @bot.hybrid_command(name="showstock", description="Show the current stock of items")
 async def showstock(ctx: commands.Context):
-    if any(role.name == "Owner" for role in ctx.author.roles):
+    if any(role.name == "Founder" for role in ctx.author.roles):
         free_items_in_stock = [item for item in free_items_list if item not in generated_items]
         premium_items_in_stock = [item for item in premium_items_list if item not in generated_items]
         letter_items_in_stock = [item for item in letter_items_list if item not in generated_items]
@@ -182,13 +184,13 @@ async def showstock(ctx: commands.Context):
             ephemeral=True
         )
     else:
-        await ctx.send("You need the 'owner' role to use this command.", ephemeral=True)
+        await ctx.send("You need the 'Founder' role to use this command.", ephemeral=True)
 
 
 @bot.hybrid_command(name="clearstock", description="Clear all items from the specified stock")
 @app_commands.describe(item_type="Type of stock to clear (free, premium, or letter)")
 async def clearstock(ctx: commands.Context, item_type: str):
-    if any(role.name == "Owner" for role in ctx.author.roles):  
+    if any(role.name == "Founder" for role in ctx.author.roles):  
         def check(msg):
             return msg.author == ctx.author and msg.content.lower() in ['yes', 'no']
 
@@ -225,7 +227,7 @@ import shutil
 
 @bot.hybrid_command(name="backup", description="Create a backup of all item lists")
 async def backup(ctx: commands.Context):
-    if any(role.name == "Owner" for role in ctx.author.roles): 
+    if any(role.name == "Founder" for role in ctx.author.roles): 
         try:
             backup_file_paths = {
                 "free_items": "backup_free_items.json",
@@ -282,7 +284,7 @@ def save_removal_counts():
 @bot.hybrid_command(name="remove", description="Remove an item from the stock")
 @app_commands.describe(item_type="Type of item to remove (free, premium, letter)", item="The item to remove")
 async def remove(ctx: commands.Context, item_type: str, *, item: str):
-    if any(role.name == "Owner" for role in ctx.author.roles):
+    if any(role.name == "Founder" for role in ctx.author.roles):
         item_list = []
 
         if item_type == "free":
@@ -319,5 +321,5 @@ async def remove(ctx: commands.Context, item_type: str, *, item: str):
 
 
 
-TOKEN = 'BOT_TOKEN_HERE'
+TOKEN = ''
 bot.run(TOKEN)
